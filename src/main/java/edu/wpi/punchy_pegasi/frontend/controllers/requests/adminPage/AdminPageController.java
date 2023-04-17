@@ -1,6 +1,7 @@
 package edu.wpi.punchy_pegasi.frontend.controllers.requests.adminPage;
 
 import edu.wpi.punchy_pegasi.App;
+import edu.wpi.punchy_pegasi.backend.PdbController;
 import edu.wpi.punchy_pegasi.generated.Facade;
 import edu.wpi.punchy_pegasi.schema.TableType;
 import io.github.palexdev.materialfx.controls.MFXComboBox;
@@ -27,7 +28,7 @@ public class AdminPageController {
     private final Facade facade = App.getSingleton().getFacade();
     private final Map<String, AdminTable> tables = new LinkedHashMap<>() {{
         put("Node", new AdminTable<>("Node", TableType.NODES, () -> facade.getAllNode().values().stream().toList()));
-        put("Location", new AdminTable<>("Location", TableType.LOCATIONNAMES, () -> facade.getAllLocationName().values().stream().toList()));
+        put("Location", new AdminTable<>("LocationName", TableType.LOCATIONNAMES, () -> facade.getAllLocationName().values().stream().toList()));
         put("Edge", new AdminTable<>("Edge", TableType.EDGES, () -> facade.getAllEdge().values().stream().toList()));
         put("Move", new AdminTable<>("Move", TableType.MOVES, () -> facade.getAllMove().values().stream().toList()));
         put("Conference", new AdminTable<>("Conference Room Service Request", TableType.CONFERENCEREQUESTS, () -> facade.getAllConferenceRoomEntry().values().stream().toList()));
@@ -51,15 +52,20 @@ public class AdminPageController {
     String filePath = "";
     File selectedFile = new File("");
     File selectedDir = new File("");
+
+    final PdbController pdb = App.getSingleton().getPdb();
     @FXML
     private VBox tableContainer;
     private AdminTable currentTable;
-    @Getter
     @Setter
     private ArrayList<String> requests = new ArrayList<>(); //store requests in list to search through
 
     public void initialize() {
-        ObservableList<String> importTableTypes = FXCollections.observableArrayList("Nodes", "Edges", "Moves", "Location Names");
+        ObservableList<String> importTableTypes = FXCollections.observableArrayList();
+        tables.values().stream().filter(f -> !f.humanReadableName.toLowerCase().contains("request")).forEach(f -> {
+            System.out.println(f.humanReadableName);
+            importTableTypes.add(f.humanReadableName);
+        });
         tableTypesComboBox.setItems(importTableTypes);
 
         FileChooser fileChooser = new FileChooser();
@@ -77,17 +83,42 @@ public class AdminPageController {
         displayButton.setOnAction(e -> {
             String name = displayTableTypeComboBox.getSelectedItem();
             tables.values().stream().filter(f -> Objects.equals(f.humanReadableName, name)).forEach(f -> {
-                System.out.println(f.humanReadableName);
                 showTable(f);
             });
         });
 
         importButton.setOnAction(e -> {
-            //fix
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+            selectedFile = fileChooser.showOpenDialog(App.getSingleton().getPopupStage());
+
+            if (selectedFile != null && tableTypesComboBox.getSelectedItem() != null) {
+                filePath = selectedFile.getAbsolutePath();
+                fileText.setText(filePath);
+                tables.values().stream().filter(f -> f.humanReadableName.equals(tableTypesComboBox.getSelectedItem())).forEach(f -> {
+                    try {
+                        pdb.importTable(f.tableType, filePath);
+                    } catch (PdbController.DatabaseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+            }
         });
 
         exportButton.setOnAction(e -> {
-            //fix
+            selectedDir = directoryChooser.showDialog(App.getSingleton().getPopupStage());
+            fileText.setText(selectedDir.getAbsolutePath());
+
+            while (selectedDir != null) {
+                tables.values().stream().filter(f -> f.humanReadableName.equals(tableTypesComboBox.getSelectedItem())).forEach(f -> {
+                    try {
+                        pdb.exportTable(selectedDir + "\\" + f.humanReadableName + ".csv", f.tableType);
+                        selectedDir = null;
+                    } catch (PdbController.DatabaseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+            }
         });
     }
 
