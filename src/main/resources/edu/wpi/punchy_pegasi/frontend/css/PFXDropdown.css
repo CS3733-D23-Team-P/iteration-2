@@ -1,0 +1,5 @@
+.pfx-dropdown{
+    -fx-background-color: -pfx-primary;
+    -fx-border-width: 0;
+    -fx-background-radius: 6;
+}
