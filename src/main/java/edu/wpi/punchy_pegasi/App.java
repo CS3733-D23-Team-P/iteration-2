@@ -2,6 +2,7 @@ package edu.wpi.punchy_pegasi;
 
 import edu.wpi.punchy_pegasi.backend.PdbController;
 import edu.wpi.punchy_pegasi.frontend.Screen;
+import edu.wpi.punchy_pegasi.frontend.components.PFXConference;
 import edu.wpi.punchy_pegasi.frontend.components.PageLoading;
 import edu.wpi.punchy_pegasi.frontend.controllers.ErrorController;
 import edu.wpi.punchy_pegasi.frontend.controllers.LayoutController;
@@ -16,6 +17,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.Getter;
@@ -222,6 +225,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
+        loadStylesheet("frontend/css/DefaultTheme.css");
         Thread.setDefaultUncaughtExceptionHandler(App::showError);
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Brigham and Women's Hospital");
