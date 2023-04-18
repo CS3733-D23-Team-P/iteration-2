@@ -10,7 +10,6 @@ import edu.wpi.punchy_pegasi.schema.Edge;
 import edu.wpi.punchy_pegasi.schema.LocationName;
 import edu.wpi.punchy_pegasi.schema.Move;
 import edu.wpi.punchy_pegasi.schema.Node;
-import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXFilterComboBox;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -64,6 +63,7 @@ public class PathfindingMap {
     private Map<Long, Move> moves;
     private Map<Long, Move> movesByNodeID = new HashMap<>();
     private Map<String, LocationName> locationsByLongName = new HashMap<>();
+    private String selectedAlgo;
     private final StringConverter<Node> nodeToLocation = new StringConverter<>() {
         @Override
         public String toString(Node node) {
@@ -195,11 +195,14 @@ public class PathfindingMap {
 
         var graph = new Graph<>(nodes, edgeList);
         var heuristic = new CartesianHeuristic();
-        var dfs = new DFS<>(graph);
-        var bfs = new BFS<>(graph);
-        var AStar = new AStar<>(graph, heuristic, heuristic);
-        var palgo = new Palgo<>(graph, heuristic, heuristic, bfs);
-        palgo.setPathfinder(AStar);
+        if(selectedAlgo.equals("Depth-First Search")){
+            PathfindingSingleton.SINGLETON.setPathfindingAlgo(new DFS<>(graph));
+        } else if(selectedAlgo.equals("Breadth-First Search")){
+            PathfindingSingleton.SINGLETON.setPathfindingAlgo(new BFS<>(graph));
+        } else {
+            PathfindingSingleton.SINGLETON.setPathfindingAlgo(new AStar<>(graph, heuristic, heuristic));
+        }
+        var palgo = new Palgo<>(graph, heuristic, heuristic, PathfindingSingleton.SINGLETON);
         try {
             var path = palgo.findPath(start,end).stream().toList();
             for (var floor : floors.values())
@@ -228,6 +231,6 @@ public class PathfindingMap {
     }
     @FXML
     private void setAlgo() {
-        selectAlgo.getSelectedItem();
+        selectedAlgo = selectAlgo.getSelectedItem();
     }
 }
