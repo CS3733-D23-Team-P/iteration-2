@@ -39,7 +39,7 @@
 @import "MFXTreeView.css";
 
 /*TeamP css*/
-@import "Sidebar.css";
+@import "Layout.css";
 @import "PFXIcon.css";
 @import "PFXButton.css";
 @import "PFXSidebarItem.css";
@@ -53,3 +53,4 @@
 @import "PFXCardVertical.css";
 @import "PFXCardHorizontal.css";
 @import "PFXPicker.css";
+@import "Conference.css";
