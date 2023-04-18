@@ -44,6 +44,8 @@ public class PathfindingMap {
     @FXML
     private PFXButton selectGraphically;
     @FXML
+    private MFXFilterComboBox<String> selectAlgo;
+    @FXML
     private BorderPane root;
     private IMap<HospitalFloor> map;
     @FXML
@@ -116,6 +118,8 @@ public class PathfindingMap {
                 });
             }
         });
+
+        selectAlgo.setItems(FXCollections.observableArrayList("AStar", "Depth-First Search", "Breadth-First Search"));
         selectGraphically.setDisable(true);
         selectGraphicallyCancel.setVisible(false);
         selectGraphicallyCancel.setManaged(false);
@@ -221,5 +225,9 @@ public class PathfindingMap {
         } catch (IllegalStateException e) {
             return "Path not found";
         }
+    }
+    @FXML
+    private void setAlgo() {
+        selectAlgo.getSelectedItem();
     }
 }
