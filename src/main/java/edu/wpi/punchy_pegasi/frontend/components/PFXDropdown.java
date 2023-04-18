@@ -7,7 +7,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public class PFXDropdown<T> extends ComboBox<T> {
     ObservableList<T> items;
@@ -16,6 +15,8 @@ public class PFXDropdown<T> extends ComboBox<T> {
 
     public PFXDropdown(ObservableList<T> items, BiPredicate<? super T, String> predicate) {
         super();
+        getStyleClass().add("pfx-dropdown");
+        //getStyleClass().add("pfx-dropdown-base");
         setEditable(true);
         filteredItems = new FilteredList<>(items, p -> true);
         this.items = items;
@@ -25,6 +26,7 @@ public class PFXDropdown<T> extends ComboBox<T> {
             final T selected = getSelectionModel().getSelectedItem();
             Platform.runLater(() -> {
                 if (selected == null || !selected.equals(editor.getText())) {
+                    show();
                     filteredItems.setPredicate(i -> predicate.test(i, newValue));
                 }
             });
